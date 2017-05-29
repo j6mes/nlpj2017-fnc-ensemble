@@ -14,7 +14,8 @@ class DataSet():
         self.articles = dict()
 
         #make the body ID an integer value
-        for s in self.stances:
+        for sid,s in enumerate(self.stances):
+            s['Stance ID'] = sid
             s['Body ID'] = int(s['Body ID'])
 
         #copy all bodies into a dictionary
