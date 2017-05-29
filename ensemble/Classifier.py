@@ -44,7 +44,7 @@ class Classifier:
 
             fs = []
             for ff in ffns:
-                fs.extend(ff(headline,body))
+                fs.extend(ff(stance['Stance ID'],headline,body))
 
             fdict[stance['Stance ID']] = fs
 

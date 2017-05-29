@@ -1,7 +1,9 @@
 *.tag*
 splits/*.txt
 features/*.npy
+features/*.pickle
 *.pyc
+GoogleNews*
 .DS_Store
 .idea
 __pycache__

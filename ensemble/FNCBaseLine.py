@@ -42,7 +42,7 @@ def gen_or_load_feats(feat_fn, headlines, bodies, feature_file):
 
 
 
-def word_overlap_features(headline, body):
+def word_overlap_features(id,headline, body):
     clean_headline = clean(headline)
     clean_body = clean(body)
     clean_headline = get_tokenized_lemmas(clean_headline)
@@ -52,7 +52,7 @@ def word_overlap_features(headline, body):
     return features
 
 
-def refuting_features(headline, body):
+def refuting_features(id,headline, body):
     _refuting_words = [
         'fake',
         'fraud',
@@ -76,7 +76,7 @@ def refuting_features(headline, body):
 
 
 
-def polarity_features(headline, body):
+def polarity_features(id,headline, body):
     _refuting_words = [
         'fake',
         'fraud',
@@ -153,7 +153,7 @@ def append_ngrams(features, text_headline, text_body, size):
 
 
 
-def binary_co_occurence(headline, body):
+def binary_co_occurence(id,headline, body):
     # Count how many times a token in the title
     # appears in the body text.
     bin_count = 0
@@ -165,7 +165,7 @@ def binary_co_occurence(headline, body):
             bin_count_early += 1
     return [bin_count, bin_count_early]
 
-def binary_co_occurence_stops(headline, body):
+def binary_co_occurence_stops(id,headline, body):
     # Count how many times a token in the title
     # appears in the body text. Stopwords in the title
     # are ignored.
@@ -177,7 +177,7 @@ def binary_co_occurence_stops(headline, body):
             bin_count_early += 1
     return [bin_count, bin_count_early]
 
-def count_grams(headline, body):
+def count_grams(id,headline, body):
     # Count how many times an n-gram of the title
     # appears in the entire body, and intro paragraph
 

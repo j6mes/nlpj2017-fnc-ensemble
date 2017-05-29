@@ -1,9 +1,13 @@
 import sys
 import numpy as np
+from scipy import spatial
 
 from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.feature_extraction.text import TfidfVectorizer
+from tqdm import tqdm
 
 from ensemble.FNCBaseLine import FNCBaseLine
+from ensemble.XiaoxuanWang import XiaoxuanWang
 from feature_engineering import refuting_features, polarity_features, hand_features, gen_or_load_feats
 from feature_engineering import word_overlap_features
 from utils.dataset import DataSet
@@ -87,6 +91,7 @@ class Slv2Cls:
         return prd
 
 
+
 if __name__ == "__main__":
     d = DataSet()
     folds,hold_out = kfold_split(d,n_folds=2)
@@ -95,10 +100,6 @@ if __name__ == "__main__":
     Xs = dict()
     ys = dict()
 
-    fb = FNCBaseLine(d)
-    fb.preload_features(d.stances)
-
-    slave_classifiers = [fb]
     master_classifier = None
 
     train = dict()
@@ -114,6 +115,20 @@ if __name__ == "__main__":
         test[fold] = fold_stances[fold]
 
     fold = 0
+
+
+
+    fb = FNCBaseLine(d)
+    fb.preload_features(d.stances)
+
+
+    xxw = XiaoxuanWang(d)
+    xxw.preload_features(d.stances)
+
+
+    slave_classifiers = [fb,xxw]
+
+
 
     slv_predicted = []
     for slave in slave_classifiers:
