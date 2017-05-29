@@ -5,11 +5,8 @@ import re
 import os
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
-from tqdm import tqdm
 
 from ensemble.Classifier import Classifier
-from utils.score import LABELS
-
 
 _wnl = nltk.WordNetLemmatizer()
 
@@ -202,8 +199,9 @@ def count_grams(headline, body):
 class FNCBaseLine(Classifier):
 
     def __init__(self,dataset):
-        self.dataset = dataset
+        super().__init__(dataset)
         self.clf = GradientBoostingClassifier(n_estimators=200, random_state=14128, verbose=True)
+
 
     def predict(self,data):
         Xs,ys = self.xys(data)
@@ -212,30 +210,24 @@ class FNCBaseLine(Classifier):
 
     def train(self,data):
         Xs,ys = self.xys(data)
+        print(Xs)
+        print(ys)
+        print("RRR")
+
+        print(len(Xs))
+        print(Xs[0])
+        print(len(ys))
         self.clf.fit(Xs, ys)
 
 
-    def features(self,stance, name=""):
-        return self.fdict[stance['Stance ID']]
-
-    def generate_features(self, stances, ffns={binary_co_occurence,
+    def preload_features(self, stances, ffns=list([
+                                               binary_co_occurence,
                                                binary_co_occurence_stops,
                                                count_grams,
                                                polarity_features,
                                                refuting_features,
-                                               word_overlap_features}):
-        fdict = dict()
-        for stance in tqdm(stances):
-            headline = stance['Headline']
-            body = self.dataset.articles[stance['Body ID']]
-
-            fs = []
-            for ff in ffns:
-                fs.extend(ff(headline,body))
-
-            fdict[stance['Stance ID']] = fs
-        self.fdict = fdict
-        return fdict
+                                               word_overlap_features])):
+        self.fdict = self.load_feats("features/fnc.pickle",stances,ffns)
 
 
 

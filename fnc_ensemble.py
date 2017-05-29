@@ -96,7 +96,7 @@ if __name__ == "__main__":
     ys = dict()
 
     fb = FNCBaseLine(d)
-    fb.generate_features(d.stances)
+    fb.preload_features(d.stances)
 
     slave_classifiers = [fb]
     master_classifier = None
