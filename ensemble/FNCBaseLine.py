@@ -7,6 +7,7 @@ import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
 
 from ensemble.Classifier import Classifier
+from utils.score import report_score
 
 _wnl = nltk.WordNetLemmatizer()
 
@@ -205,7 +206,9 @@ class FNCBaseLine(Classifier):
 
     def predict(self,data):
         Xs,ys = self.xys(data)
-        return self.clf.predict(Xs)
+        prd = self.clf.predict(Xs)
+        print(report_score(ys,prd))
+        return prd
 
 
     def train(self,data):
