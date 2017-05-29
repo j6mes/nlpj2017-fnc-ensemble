@@ -205,18 +205,11 @@ class FNCBaseLine(Classifier):
 
     def predict(self,data):
         Xs,ys = self.xys(data)
-        self.clf.predict(Xs)
+        return self.clf.predict(Xs)
 
 
     def train(self,data):
         Xs,ys = self.xys(data)
-        print(Xs)
-        print(ys)
-        print("RRR")
-
-        print(len(Xs))
-        print(Xs[0])
-        print(len(ys))
         self.clf.fit(Xs, ys)
 
 
