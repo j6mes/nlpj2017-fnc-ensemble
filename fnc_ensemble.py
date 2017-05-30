@@ -4,6 +4,7 @@ from scipy import spatial
 
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import OneHotEncoder
 from tqdm import tqdm
 
 from ensemble.FNCBaseLine import FNCBaseLine
@@ -127,15 +128,17 @@ if __name__ == "__main__":
     xxw.preload_features(d.stances)
 
 
-    slave_classifiers = [fb,xxw]
+    slave_classifiers = [fb]
     slv_predicted = []
+
+    enc = OneHotEncoder(n_values=4)
 
     import os
     if not os.path.isfile("features/slave.pickle"):
         for slave in slave_classifiers:
             slave.train(train[fold])
 
-            slv_predicted.append([LABELS.index(p) for p in slave.predict(test[fold])])
+            slv_predicted.append([enc.fit(LABELS.index(p) for p in slave.predict(test[fold]))])
         pickle.dump([slave_classifiers, slv_predicted], open("features/slave.pickle","wb+"))
     else:
         slave_classifiers, slv_predicted = pickle.load(open("features/slave.pickle","rb"))
