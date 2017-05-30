@@ -341,7 +341,6 @@ class XiaoxuanWang(Classifier):
     def predict(self,data):
         Xs,ys = self.xys(data)
         prd = self.mlpc.predict(Xs)
-        print(report_score(ys,prd))
         return prd
 
 

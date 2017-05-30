@@ -11,6 +11,7 @@ from ensemble.Master import Master
 from ensemble.XiaoxuanWang import XiaoxuanWang
 from feature_engineering import refuting_features, polarity_features, hand_features, gen_or_load_feats
 from feature_engineering import word_overlap_features
+from upperbound import compute_ub
 from utils.dataset import DataSet
 from utils.generate_test_splits import kfold_split, get_stances_for_folds
 from utils.score import report_score, LABELS, score_submission
@@ -140,7 +141,7 @@ if __name__ == "__main__":
     else:
         slave_classifiers, slv_predicted = pickle.load(open("features/slave.pickle","rb"))
 
-
+    compute_ub(slave_classifiers,hold_out_stances)
 
     master_train.extend(zip(test[fold],*slv_predicted))
     master = Master(d)

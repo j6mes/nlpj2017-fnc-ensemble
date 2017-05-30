@@ -207,7 +207,6 @@ class FNCBaseLine(Classifier):
     def predict(self,data):
         Xs,ys = self.xys(data)
         prd = self.clf.predict(Xs)
-        print(report_score(ys,prd))
         return prd
 
 

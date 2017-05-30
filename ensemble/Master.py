@@ -22,9 +22,6 @@ class Master(Classifier):
             Xs[i] = x + list(other_classifiers[i])
 
         pred = self.gbc.predict(Xs)
-
-        print(report_score(ys,pred))
-
         return pred
 
     def fit(self,data):
