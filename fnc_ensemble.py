@@ -7,13 +7,14 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from tqdm import tqdm
 
 from ensemble.FNCBaseLine import FNCBaseLine
+from ensemble.Master import Master
 from ensemble.XiaoxuanWang import XiaoxuanWang
 from feature_engineering import refuting_features, polarity_features, hand_features, gen_or_load_feats
 from feature_engineering import word_overlap_features
 from utils.dataset import DataSet
 from utils.generate_test_splits import kfold_split, get_stances_for_folds
 from utils.score import report_score, LABELS, score_submission
-
+import pickle
 from utils.system import parse_params, check_version
 
 from sklearn.ensemble import GradientBoostingClassifier
@@ -131,11 +132,27 @@ if __name__ == "__main__":
 
 
     slv_predicted = []
+
+    import os
+    if not os.path.isfile("features/slave.pickle"):
+        for slave in slave_classifiers:
+            s = slave
+            s.train(train[fold])
+
+            slave_classifiers.append([LABELS.index(p) for p in s.predict(test[fold])])
+        pickle.dump([slave_classifiers, slv_predicted], open("features/slave.pickle","wb+"))
+    else:
+        slave_classifiers, slv_predicted = pickle.load(open("features/slave.pickle","rb"))
+
+
+
+    master_train.extend(zip(test[fold],*slv_predicted))
+    master = Master(d)
+    master.preload_features(d.stances)
+    master.fit(master_train)
+
+    slv_predicted_holdout = []
     for slave in slave_classifiers:
         s = slave
-        s.train(train[fold])
-
-        slv_predicted.append(s.predict(test[fold]))
-        print(slv_predicted)
-    master_train.extend(zip(test[fold],*slv_predicted))
-
+        slv_predicted_holdout.append([LABELS.index(p) for p in s.predict(hold_out_stances)])
+    master.predict(zip(hold_out_stances,*slv_predicted_holdout))

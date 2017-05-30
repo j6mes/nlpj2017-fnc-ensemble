@@ -15,7 +15,7 @@ import os
 import gensim
 import re
 import numpy as np
-
+import pickle
 def clean(data_str):
     word_re = r'(' \
               r'(?:[A-Za-z0-9]+[\.]+[A-Za-z0-9]+[\-]+[A-Za-z0-9]+)|' \
@@ -309,7 +309,13 @@ class XiaoxuanWang(Classifier):
         topo_size = (300, 8)
         self.mlpc = MLPClassifier(hidden_layer_sizes=topo_size, random_state=19940807)
 
-        XiaoxuanWang.tfidfs.update(self.precompute_tf_idfs(dataset))
+        if not os.path.isfile("features/tfidf.pickle"):
+            XiaoxuanWang.tfidfs.update(self.precompute_tf_idfs(dataset))
+            pickle.dump(XiaoxuanWang.tfidfs, open("features/tfidf.pickle", "wb+"))
+        else:
+            tfs = pickle.load(open("features/tfidf.pickle", "rb"))
+            XiaoxuanWang.tfidfs.update(tfs)
+
 
     def precompute_tf_idfs(self,dataset):
         headlines = []
