@@ -128,18 +128,14 @@ if __name__ == "__main__":
 
 
     slave_classifiers = [fb,xxw]
-
-
-
     slv_predicted = []
 
     import os
     if not os.path.isfile("features/slave.pickle"):
         for slave in slave_classifiers:
-            s = slave
-            s.train(train[fold])
+            slave.train(train[fold])
 
-            slave_classifiers.append([LABELS.index(p) for p in s.predict(test[fold])])
+            slv_predicted.append([LABELS.index(p) for p in slave.predict(test[fold])])
         pickle.dump([slave_classifiers, slv_predicted], open("features/slave.pickle","wb+"))
     else:
         slave_classifiers, slv_predicted = pickle.load(open("features/slave.pickle","rb"))
@@ -153,6 +149,5 @@ if __name__ == "__main__":
 
     slv_predicted_holdout = []
     for slave in slave_classifiers:
-        s = slave
-        slv_predicted_holdout.append([LABELS.index(p) for p in s.predict(hold_out_stances)])
+        slv_predicted_holdout.append([LABELS.index(p) for p in slave.predict(hold_out_stances)])
     master.predict(zip(hold_out_stances,*slv_predicted_holdout))
