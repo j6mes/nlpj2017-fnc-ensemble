@@ -107,7 +107,8 @@ if __name__ == "__main__":
     train = dict()
     test = dict()
 
-    master_train = []
+    ids = list(range(len(folds)))
+    all_folds = np.hstack(tuple([fold_stances[i] for i in ids]))
 
     for fold in fold_stances:
         ids = list(range(len(folds)))
@@ -116,39 +117,55 @@ if __name__ == "__main__":
         train[fold] = np.hstack(tuple([fold_stances[i] for i in ids]))
         test[fold] = fold_stances[fold]
 
-    fold = 0
+    slave_classifiers = [FNCBaseLine,XiaoxuanWang]
 
 
-
-    fb = FNCBaseLine(d)
-    fb.preload_features(d.stances)
-
-
-    xxw = XiaoxuanWang(d)
-    xxw.preload_features(d.stances)
-
-
-    slave_classifiers = [fb,xxw]
-    slv_predicted = []
+    slv_predicted = dict()
+    master_train = dict()
 
     import os
-    if not os.path.isfile("features/slave.pickle"):
-        for slave in slave_classifiers:
-            slave.train(train[fold])
 
-            slv_predicted.append([LABELS.index(p) for p in slave.predict(test[fold])])
-        pickle.dump([slave_classifiers, slv_predicted], open("features/slave.pickle","wb+"))
+    if not os.path.isfile("features/master_train.pickle"):
+        for fold in tqdm(fold_stances):
+            slv_predicted[fold] = []
+            master_train[fold] = []
+            for slv in tqdm(slave_classifiers):
+                cls = slv(d)
+                cls.preload_features(d.stances)
+                cls.train(train[fold])
+
+                slv_predicted[fold].append([LABELS.index(p) for p in cls.predict(test[fold])])
+                master_train[fold].extend(zip(test[fold],*slv_predicted[fold]))
+
+                del cls
+
+        pickle.dump(master_train, open("features/master_train.pickle","wb+"))
     else:
-        slave_classifiers, slv_predicted = pickle.load(open("features/slave.pickle","rb"))
+        master_train = pickle.load(open("features/master_train.pickle","rb"))
 
-    compute_ub(slave_classifiers,hold_out_stances)
+    slaves = []
+    if not os.path.isfile("features/slaves.pickle"):
+        for slv in tqdm(slave_classifiers):
+            cls = slv(d)
+            cls.preload_features(d.stances)
+            cls.train(all_folds)
+            slaves.append(cls)
+        pickle.dump(master_train, open("features/slaves.pickle","wb+"))
+    else:
+        slaves = pickle.load(open("features/slaves.pickle","rb"))
 
-    master_train.extend(zip(test[fold],*slv_predicted))
+    print("UPPER BOUND:::")
+    compute_ub(slaves,hold_out_stances)
+
+    mdata = []
+    for fold in fold_stances:
+        mdata.extend(master_train[fold])
     master = Master(d)
     master.preload_features(d.stances)
-    master.fit(master_train)
+    master.fit(mdata)
 
     slv_predicted_holdout = []
-    for slave in slave_classifiers:
+    for slave in slaves:
         slv_predicted_holdout.append([LABELS.index(p) for p in slave.predict(hold_out_stances)])
+
     master.predict(zip(hold_out_stances,*slv_predicted_holdout))
