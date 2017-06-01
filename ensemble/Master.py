@@ -9,7 +9,7 @@ from utils.score import report_score
 class Master(Classifier):
     def __init__(self,dataset):
         super().__init__(dataset)
-        self.gbc = GradientBoostingClassifier()
+        self.gbc = GradientBoostingClassifier(random_state=1240)
 
     def predict(self,data):
         lists = list(zip(*data))

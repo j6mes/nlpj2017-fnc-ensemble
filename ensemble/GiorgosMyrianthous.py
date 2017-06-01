@@ -1,7 +1,6 @@
 # Author: Giorgos Myrianthous
-
+from ensemble.Classifier import Classifier
 from utils.dataset import DataSet
-from utils.generate_test_splits import split
 from os import path
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.preprocessing import FunctionTransformer
@@ -15,21 +14,14 @@ from scipy.sparse import hstack
 from scipy.sparse import coo_matrix
 from tqdm import tqdm
 from scipy import sparse
-import csv, random, numpy, score, os, re, nltk, scipy, gensim
+import csv, random, numpy, os, re, nltk, scipy, gensim
 from sklearn.neural_network import MLPClassifier
 from sklearn import tree
 from langdetect import detect
 from sklearn.ensemble import RandomForestClassifier
-
-dataset = DataSet()
+import numpy as np
 lemmatizer = nltk.WordNetLemmatizer()
 
-# Get the bodies of training data points
-def get_bodies(data):
-    bodies = []
-    for i in range(len(data)):
-        bodies.append(dataset.articles[data[i]['Body ID']])    
-    return bodies
 
 # Get the headlines of training data points
 def get_headlines(data):
@@ -48,18 +40,11 @@ def preprocess(string):
 
 
 # Function for extracting word overlap
-def extract_word_overlap(headlines, bodies):
-    word_overlap = []
-    for i, (headline, body) in tqdm(enumerate(zip(headlines, bodies))):
-        preprocess_headline = preprocess(headline)
-        preprocess_body = preprocess(body)
-        features = len(set(preprocess_headline).intersection(preprocess_body)) / float(len(set(preprocess_headline).union(preprocess_body)))
-        word_overlap.append(features)
-
-        # Convert the list to a sparse matrix (in order to concatenate the cos sim with other features)
-        word_overlap_sparse = scipy.sparse.coo_matrix(numpy.array(word_overlap)) 
-
-    return word_overlap_sparse
+def extract_word_overlap(id,headline, body):
+    preprocess_headline = preprocess(headline)
+    preprocess_body = preprocess(body)
+    features = len(set(preprocess_headline).intersection(preprocess_body)) / float(len(set(preprocess_headline).union(preprocess_body)))
+    return [features]
 
 # Function for extracting tf-idf vectors (for both the bodies and the headlines).
 def extract_tfidf(training_headlines, training_bodies, dev_headlines, dev_bodies, test_headlines, test_bodies):
@@ -71,7 +56,7 @@ def extract_tfidf(training_headlines, training_bodies, dev_headlines, dev_bodies
     headline_vectorizer = TfidfVectorizer(ngram_range=(1, 2), lowercase=True, stop_words='english')#, max_features=1024)
     headlines_tfidf = headline_vectorizer.fit_transform(training_headlines)
 
-    # Tranform dev/test bodies and headlines using the trained vectorizer (trained on training data)
+    # Tranform dev/test bodies and headlines using the trained vectori47zer (trained on training data)
     bodies_tfidf_dev = body_vectorizer.transform(dev_bodies)
     headlines_tfidf_dev = headline_vectorizer.transform(dev_headlines)
 
@@ -86,7 +71,10 @@ def extract_tfidf(training_headlines, training_bodies, dev_headlines, dev_bodies
     return training_tfidf, dev_tfidf, test_tfidf
 
 # Function for extracting the cosine similarity between bodies and headlines. 
-def extract_cosine_similarity(headlines, bodies):
+def extract_cosine_similarity(id, headline, body):
+    bodies = [body]
+    headlines = [headline]
+
     vectorizer = TfidfVectorizer(ngram_range=(1,2), lowercase=True, stop_words='english')#, max_features=1024)
 
     cos_sim_features = []
@@ -100,9 +88,10 @@ def extract_cosine_similarity(headlines, bodies):
         cos_sim_features.append(cosine_similarity[0][1])
 
     # Convert the list to a sparse matrix (in order to concatenate the cos sim with other features)
-    cos_sim_array = scipy.sparse.coo_matrix(numpy.array(cos_sim_features)) 
+    cos_sim_array = numpy.array(cos_sim_features)
 
     return cos_sim_array
+
 
 # Function for counting words
 def extract_word_counts(headlines, bodies):
@@ -118,89 +107,61 @@ def extract_word_counts(headlines, bodies):
     return word_counts_array 
 
 
-# Function for combining features of various types (lists, coo_matrix, np.array etc.)
-def combine_features(tfidf_vectors, cosine_similarity, word_overlap):
-    combined_features =  sparse.bmat([[tfidf_vectors, word_overlap.T, cosine_similarity.T]])
-    return combined_features
-
-# Function for extracting features
-# Feautres: 1) Word Overlap, 2) TF-IDF vectors, 3) Cosine similarity, 4) Word embeddings
-def extract_features(train, dev, test):
-    # Get bodies and headlines for dev and training data
-    training_bodies = get_bodies(training_data)
-    training_headlines = get_headlines(training_data)
-    dev_bodies = get_bodies(dev_data)
-    dev_headlines = get_headlines(dev_data)
-    test_bodies = get_bodies(test_data)
-    test_headlines = get_headlines(test_data)
-
-    # Extract tfidf vectors
-    print("\t-Extracting tfidf vectors..")
-    training_tfidf, dev_tfidf, test_tfidf = extract_tfidf(training_headlines, training_bodies, dev_headlines, dev_bodies, test_headlines, test_bodies)
 
 
-    # Extract word overlap 
-    print("\t-Extracting word overlap..")
-    training_overlap = extract_word_overlap(training_headlines, training_bodies)
-    dev_overlap = extract_word_overlap(dev_headlines, dev_bodies)
-    test_overlap = extract_word_overlap(test_headlines, test_bodies)
 
-    # Extract cosine similarity between bodies and headlines. 
-    print("\t-Extracting cosine similarity..")
-    training_cos = extract_cosine_similarity(training_headlines, training_bodies)
-    dev_cos = extract_cosine_similarity(dev_headlines, dev_bodies)
-    test_cos = extract_cosine_similarity(test_headlines, test_bodies)
+class GiorgosMyrianthous(Classifier):
+    def __init__(self,data,training_data):
+        super().__init__(data,training_data)
+        self.lr = LogisticRegression(C=1.0, class_weight='balanced', solver="lbfgs", max_iter=150, random_state=124912)
+        self.training_data = training_data
 
-    # Combine the features
-    training_features = combine_features(training_tfidf, training_cos, training_overlap)
-    dev_features = combine_features(dev_tfidf, dev_cos, dev_overlap)
-    test_features = combine_features(test_tfidf, test_cos, test_overlap)
+        training_bodies = []
+        training_headlines = []
+        for stance in training_data:
+            training_headlines.append(stance['Headline'])
+            training_bodies.append(data.articles[stance['Body ID']])
 
-    return training_features, dev_features, test_features
+        # Body vectorisation
+        self.body_vectorizer = TfidfVectorizer(ngram_range=(1, 2), lowercase=True, stop_words='english')
+        self.body_vectorizer.fit(training_bodies)
 
-if __name__ == '__main__':
-    ##############################################################################
+        # Headline vectorisation
+        self.headline_vectorizer = TfidfVectorizer(ngram_range=(1, 2), lowercase=True, stop_words='english')
+        self.headline_vectorizer.fit(training_headlines)
 
-    # Load the data
-    print("\n[1] Loading data..")
-    data_splits = split(dataset)
+    def train(self,data):
+        Xs,ys = self.xys(data)
+        self.lr.fit(Xs,ys)
 
-    # in the format: Stance, Headline, BodyID
-    training_data = data_splits['training']
-    dev_data = data_splits['dev']
-    test_data = data_splits['test'] # currently 0 test points
 
-    # Change the number of training examples used.
-    N = int(len(training_data) * 1.0)
-    training_data = training_data[:N]
+    def predict(self,data):
+        Xs,ys = self.xys(data)
+        pred = self.lr.predict(Xs)
+        return pred
 
-    print("\t-Training size:\t", len(training_data))
-    print("\t-Dev size:\t", len(dev_data))
-    print("\t-Test data:\t", len(test_data))
 
-    ##############################################################################
+    def f_tfidf(self,id,headline,body):
+        bodies_tfidf = self.body_vectorizer.transform([body])
+        headlines_tfidf = self.headline_vectorizer.transform([headline])
+        return scipy.sparse.hstack((bodies_tfidf, headlines_tfidf))
 
-    # Feature extraction
-    print("[2] Extracting features.. ")
-    training_features, dev_features, test_features = extract_features(training_data, dev_data, test_data)
 
-    ##############################################################################
+    def preload_features(self,stances):
+        ff = [self.f_tfidf,extract_cosine_similarity, extract_word_overlap]
+        self.fdict = self.load_feats("features/gm.pickle", stances,ff)
 
-    # Fitting model
-    print("[3] Fitting model..")
-    print("\t-Logistic Regression")
-    lr = LogisticRegression(C = 1.0, class_weight='balanced', solver="lbfgs", max_iter=150) 
-    #lr = RandomForestClassifier(n_estimators=10, random_state=12345)
-    #lr = MultinomialNB(alpha=0.01, class_prior=None, fit_prior=True)
+    def gen_feats(self, stances, ffns):
+        print("Sparse feature generation")
+        fdict = dict()
+        for stance in tqdm(stances):
+            headline = stance['Headline']
+            body = self.dataset.articles[stance['Body ID']]
 
-    targets_tr = [a['Stance'] for a in training_data]
-    targets_dev = [a['Stance'] for a in dev_data]
-    targets_test = [a['Stance'] for a in test_data]
+            fs = scipy.sparse.coo_matrix((0,1))
+            for ff in ffns:
+                fs = scipy.sparse.hstack((fs,ff(stance['Stance ID'],headline,body)))
 
-    y_pred = lr.fit(training_features, targets_tr).predict(test_features)
+            fdict[stance['Stance ID']] = fs
 
-    ##############################################################################
-
-    # Evaluation
-    print("[4] Evaluating model..")
-    score.report_score(targets_test, y_pred)
+        return fdict

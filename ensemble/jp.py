@@ -283,7 +283,7 @@ class Feature:
         return overlap_count_array
 
 class FncClassifier:
-    def __init__(self, is_PCA=False, n_components=300, is_nltk_token = False):
+    def __init__(self, is_PCA=False, n_components=300, is_nltk_token = False ):
         self.stopword_set = set()
         self.create_stop_words()
         # SVM

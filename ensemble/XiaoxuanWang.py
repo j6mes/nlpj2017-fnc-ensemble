@@ -298,22 +298,23 @@ def hand_features(headline_str, body_str):
 #     return X
 
 
-def tfidf_feature(id,headline, body):
-    return [XiaoxuanWang.tfidfs[id]]
+
 
 class XiaoxuanWang(Classifier):
-    tfidfs = dict()
-    def __init__(self,dataset):
-        super().__init__(dataset)
+    def __init__(self,dataset,train):
+        super().__init__(dataset,train)
         topo_size = (300, 8)
         self.mlpc = MLPClassifier(hidden_layer_sizes=topo_size, random_state=19940807)
 
+        self.tfidfs = dict()
+
+
         if not os.path.isfile("features/tfidf.pickle"):
-            XiaoxuanWang.tfidfs.update(self.precompute_tf_idfs(dataset))
-            pickle.dump(XiaoxuanWang.tfidfs, open("features/tfidf.pickle", "wb+"))
+            self.tfidfs.update(self.precompute_tf_idfs(dataset))
+            pickle.dump(self.tfidfs, open("features/tfidf.pickle", "wb+"))
         else:
             tfs = pickle.load(open("features/tfidf.pickle", "rb"))
-            XiaoxuanWang.tfidfs.update(tfs)
+            self.tfidfs.update(tfs)
 
 
     def precompute_tf_idfs(self,dataset):
@@ -348,20 +349,19 @@ class XiaoxuanWang(Classifier):
         self.mlpc.fit(Xs, ys)
 
     def load_w2v(self):
-        pass
+        pickle.load(open("features/tfidf.pickle","rb"))
 
     def delete_big_files(self):
-        pass
+        del self.tfidfs
 
-
-
+    def tfidf_feature(self,id, headline, body):
+        return [self.tfidfs[id]]
 
     def preload_features(self, stances, ffns=list([
-                                               tfidf_feature,
                                                get_word2vector_f,
                                                polarity_features,
                                                refuting_features])):
-
+        ffns.append(self.tfidf_feature)
         self.fdict = self.load_feats("features/xxw.pickle",stances,ffns)
 
 

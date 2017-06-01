@@ -3,8 +3,8 @@ from ensemble.jp import FncClassifier, Feature
 
 
 class JiashuPu(Classifier):
-    def __init__(self,data):
-        super().__init__(data)
+    def __init__(self,data,train):
+        super().__init__(data,train)
         self.jp = FncClassifier()
         word2vector = 'GoogleNews-vectors-negative300-small.bin'
         feature_generator = Feature(word2vector)

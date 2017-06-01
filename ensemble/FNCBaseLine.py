@@ -199,8 +199,8 @@ def count_grams(id,headline, body):
 
 class FNCBaseLine(Classifier):
 
-    def __init__(self,dataset):
-        super().__init__(dataset)
+    def __init__(self,dataset,train):
+        super().__init__(dataset,train)
         self.clf = GradientBoostingClassifier(n_estimators=200, random_state=14128, verbose=True)
 
 

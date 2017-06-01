@@ -6,6 +6,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from tqdm import tqdm
 
+from ensemble.GiorgosMyrianthous import GiorgosMyrianthous
 from ensemble.JiashuPu import JiashuPu
 from ensemble.FNCBaseLine import FNCBaseLine
 from ensemble.Master import Master
@@ -41,8 +42,7 @@ if __name__ == "__main__":
         train[fold] = np.hstack(tuple([fold_stances[i] for i in ids]))
         test[fold] = fold_stances[fold]
 
-    slave_classifiers = [FNCBaseLine,XiaoxuanWang,JiashuPu]
-
+    slave_classifiers = [FNCBaseLine,XiaoxuanWang,JiashuPu,GiorgosMyrianthous]
 
     slv_predicted = dict()
     master_train = dict()
@@ -54,7 +54,7 @@ if __name__ == "__main__":
             slv_predicted[fold] = []
             master_train[fold] = []
             for slv in tqdm(slave_classifiers):
-                cls = slv(d)
+                cls = slv(d,all_folds)
                 cls.preload_features(d.stances)
                 cls.train(train[fold])
 

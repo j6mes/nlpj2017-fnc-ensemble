@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 
 class Classifier:
-    def __init__(self,dataset):
+    def __init__(self,dataset,train):
         self.dataset = dataset
         self.fdict = dict()
 
