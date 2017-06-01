@@ -48,7 +48,6 @@ def word2vecModel():
 
 model = word2vecModel()
 
-
 def get_word2vector_f(id,headline, body):
     feature =[]
     # word_re = r'(' \
@@ -347,6 +346,12 @@ class XiaoxuanWang(Classifier):
     def train(self,data):
         Xs,ys = self.xys(data)
         self.mlpc.fit(Xs, ys)
+
+    def load_w2v(self):
+        pass
+
+    def delete_big_files(self):
+        pass
 
 
 

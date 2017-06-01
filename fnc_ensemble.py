@@ -146,13 +146,22 @@ if __name__ == "__main__":
     slaves = []
     if not os.path.isfile("features/slaves.pickle"):
         for slv in tqdm(slave_classifiers):
+            print("Training classifier" + str(type(slv)))
             cls = slv(d)
             cls.preload_features(d.stances)
             cls.train(all_folds)
             slaves.append(cls)
+            cls.delete_big_files()
         pickle.dump(slaves, open("features/slaves.pickle","wb+"))
     else:
         slaves = pickle.load(open("features/slaves.pickle","rb"))
+
+
+    for slave in slaves:
+        print("Loading features for slave " + str(type(slave)))
+        slave.preload_features(d.stances)
+        slave.load_w2v()
+
 
     print("UPPER BOUND:::")
     compute_ub(slaves,hold_out_stances)

@@ -21,5 +21,14 @@ class JiashuPu(Classifier):
         prd = self.jp.mlp_clf.predict(Xs)
         return prd
 
+    def load_w2v(self):
+        word2vector = 'GoogleNews-vectors-negative300-small.bin'
+        feature_generator = Feature(word2vector)
+        self.jp.load_feature_generator(feature_generator)
+
+    def delete_big_files(self):
+        super().delete_big_files()
+        del self.jp.feature_generator
+
     def preload_features(self,data):
         self.fdict = self.load_feats("features/jp.pickle",data,list([self.jp.get_feature_for_stance]))

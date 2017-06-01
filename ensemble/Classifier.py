@@ -15,6 +15,12 @@ class Classifier:
     def train(self,data):
         pass
 
+    def load_w2v(self):
+        pass
+
+    def delete_big_files(self):
+        del self.fdict
+
     def features(self,stance):
         return self.fdict[stance['Stance ID']],stance['Stance']
 
