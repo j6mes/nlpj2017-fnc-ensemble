@@ -92,7 +92,7 @@ if __name__ == "__main__":
     mdata = []
     for fold in fold_stances:
         mdata.extend(master_train[fold])
-    master = Master(d)
+    master = Master(d,mdata)
     master.preload_features(d.stances)
     master.fit(mdata)
 
