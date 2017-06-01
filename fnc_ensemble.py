@@ -135,9 +135,8 @@ if __name__ == "__main__":
                 cls.train(train[fold])
 
                 slv_predicted[fold].append([LABELS.index(p) for p in cls.predict(test[fold])])
-                master_train[fold].extend(zip(test[fold],*slv_predicted[fold]))
-
                 del cls
+            master_train[fold].extend(zip(test[fold], *slv_predicted[fold]))
 
         pickle.dump(master_train, open("features/master_train.pickle","wb+"))
     else:
@@ -150,7 +149,7 @@ if __name__ == "__main__":
             cls.preload_features(d.stances)
             cls.train(all_folds)
             slaves.append(cls)
-        pickle.dump(master_train, open("features/slaves.pickle","wb+"))
+        pickle.dump(slaves, open("features/slaves.pickle","wb+"))
     else:
         slaves = pickle.load(open("features/slaves.pickle","rb"))
 
@@ -168,4 +167,5 @@ if __name__ == "__main__":
     for slave in slaves:
         slv_predicted_holdout.append([LABELS.index(p) for p in slave.predict(hold_out_stances)])
 
-    master.predict(zip(hold_out_stances,*slv_predicted_holdout))
+    final_predictions = master.predict(zip(hold_out_stances,*slv_predicted_holdout))
+    report_score(master.xys(hold_out_stances)[1],final_predictions)

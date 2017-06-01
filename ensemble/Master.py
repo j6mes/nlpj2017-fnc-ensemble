@@ -21,6 +21,7 @@ class Master(Classifier):
         for i, x in enumerate(Xs):
             Xs[i] = x + list(other_classifiers[i])
 
+        print(len(Xs[0]))
         pred = self.gbc.predict(Xs)
         return pred
 
@@ -35,6 +36,7 @@ class Master(Classifier):
         for i,x in enumerate(Xs):
             Xs[i] = x + list(other_classifiers[i])
 
+        print(len(Xs[0]))
         self.gbc.fit(Xs,ys)
 
     def preload_features(self, stances, ffns=list([
