@@ -6,6 +6,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from tqdm import tqdm
 
+from ensemble.JiashuPu import JiashuPu
 from ensemble.FNCBaseLine import FNCBaseLine
 from ensemble.Master import Master
 from ensemble.XiaoxuanWang import XiaoxuanWang
@@ -117,7 +118,7 @@ if __name__ == "__main__":
         train[fold] = np.hstack(tuple([fold_stances[i] for i in ids]))
         test[fold] = fold_stances[fold]
 
-    slave_classifiers = [FNCBaseLine,XiaoxuanWang]
+    slave_classifiers = [FNCBaseLine,XiaoxuanWang,JiashuPu]
 
 
     slv_predicted = dict()
