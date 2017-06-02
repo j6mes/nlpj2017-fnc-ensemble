@@ -376,5 +376,7 @@ class XiaoxuanWang(Classifier):
         self.fdict = self.load_feats("features/xxw."+fext+"pickle",stances,ffns)
 
 
+    def prepare_final(self,dataset,train):
+        self.tfidfs.update(self.precompute_tf_idfs(dataset,train))
 
 

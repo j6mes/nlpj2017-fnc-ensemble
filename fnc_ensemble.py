@@ -121,7 +121,9 @@ if __name__ == "__main__":
 
     slv_predicted_test = []
     for slave in slaves:
-        slave.preload_features(test_dataset,"test.")
+        slave.dataset.articles.update(test_dataset.articles)
+        slave.prepare_final(test_dataset.stances,all_folds)
+        slave.preload_features(test_dataset.stances,"test.")
         slv_predicted_test.append([LABELS.index(p) for p in slave.predict(test_dataset.stances)])
 
     final_predictions = master.predict(zip(test_dataset.stances,*slv_predicted_test))
