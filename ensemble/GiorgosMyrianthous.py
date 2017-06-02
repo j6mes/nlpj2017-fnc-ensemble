@@ -7,9 +7,7 @@ from sklearn.preprocessing import FunctionTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.naive_bayes import MultinomialNB
-from sklearn import metrics
-import pylab as py
+
 from scipy.sparse import hstack
 from scipy.sparse import coo_matrix
 from tqdm import tqdm
