@@ -132,11 +132,13 @@ class GiorgosMyrianthous(Classifier):
 
     def train(self,data):
         Xs,ys = self.xys(data)
+        Xs = scipy.sparse.vstack(Xs)
         self.lr.fit(Xs,ys)
 
 
     def predict(self,data):
         Xs,ys = self.xys(data)
+        Xs = scipy.sparse.vstack(Xs)
         pred = self.lr.predict(Xs)
         return pred
 
