@@ -44,11 +44,6 @@ if __name__ == "__main__":
 
     slave_classifiers = [FNCBaseLine,XiaoxuanWang,JiashuPu,GiorgosMyrianthous]
 
-    cls = GiorgosMyrianthous(d,all_folds)
-    cls.preload_features(d.stances)
-    cls.train(train[0])
-
-
 
     slv_predicted = dict()
     master_train = dict()
