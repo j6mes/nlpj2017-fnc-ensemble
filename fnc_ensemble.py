@@ -44,6 +44,12 @@ if __name__ == "__main__":
 
     slave_classifiers = [FNCBaseLine,XiaoxuanWang,JiashuPu,GiorgosMyrianthous]
 
+    cls = GiorgosMyrianthous(d,all_folds)
+    cls.preload_features(d.stances)
+    cls.train(train[0])
+
+
+
     slv_predicted = dict()
     master_train = dict()
 
@@ -54,12 +60,18 @@ if __name__ == "__main__":
             slv_predicted[fold] = []
             master_train[fold] = []
             for slv in tqdm(slave_classifiers):
+                print("Create classifier" + str(type(slv)))
                 cls = slv(d,all_folds)
+
+                print("Preload training data" + str(type(slv)))
                 cls.preload_features(d.stances)
+
+                print("Train on fold " + str(fold) + " - " + str(type(slv)))
                 cls.train(train[fold])
 
                 slv_predicted[fold].append([LABELS.index(p) for p in cls.predict(test[fold])])
                 del cls
+
             master_train[fold].extend(zip(test[fold], *slv_predicted[fold]))
 
         pickle.dump(master_train, open("features/master_train.pickle","wb+"))
@@ -70,7 +82,7 @@ if __name__ == "__main__":
     if not os.path.isfile("features/slaves.pickle"):
         for slv in tqdm(slave_classifiers):
             print("Training classifier" + str(type(slv)))
-            cls = slv(d)
+            cls = slv(d,all_folds)
             cls.preload_features(d.stances)
             cls.train(all_folds)
             slaves.append(cls)

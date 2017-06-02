@@ -1,5 +1,5 @@
 from ensemble.Classifier import Classifier
-from ensemble.jp import FncClassifier, Feature
+from original.jp import FncClassifier, Feature
 
 
 class JiashuPu(Classifier):

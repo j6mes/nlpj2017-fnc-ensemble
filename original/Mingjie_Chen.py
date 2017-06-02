@@ -218,12 +218,19 @@ class MLP:
                       optimizer=sgd,
                       metrics=['accuracy'])
 
-    def train(self,train_vec,train_l,dev_vec,dev_l):
+    def train_dev(self,train_vec,train_l,dev_vec,dev_l):
         self.hist = self.model.fit(train_vec,train_l,batch_size=64,epochs=100
                        ,verbose=2,validation_data=(dev_vec,dev_l),shuffle=True)
-        self.model.save_weights('weights.h5')
+        self.model.save_weights('features/mingjiechen.weights.h5')
+
+
+    def train(self,train_vec,train_l):
+        self.hist = self.model.fit(train_vec,train_l,batch_size=64,epochs=100,verbose=2,shuffle=True)
+        self.model.save_weights('features/mingjiechen.weights.h5')
+
+
 class Mingjie_Chen:
-    def __init__(self):
+    def old__init__(self):
         config = Config()
         f = process_data()
         train_examples, dev_examples, test_examples = f.load_data(config)
@@ -250,9 +257,12 @@ class Mingjie_Chen:
         self.train_vec = self.mlp.average_vector(train_x1, train_x2, embeddings)
         self.dev_vec = self.mlp.average_vector(dev_x1, dev_x2, embeddings)
         self.test_vec = self.mlp.average_vector(test_x1, test_x2, embeddings)
+
+
     def train(self):
         print("train model")
         self.mlp.train(self.train_vec, self.train_y, self.dev_vec, self.dev_y)
+
     def predict(self):
         print("test model")
         self.mlp.model.load_weights('Mingjie_Chen_weights.h5')
