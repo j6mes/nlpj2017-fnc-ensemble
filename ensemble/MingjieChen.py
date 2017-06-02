@@ -54,7 +54,7 @@ class MingjieChen(Classifier):
 
         result = self.mlp.model.predict(Xs)
         labels = list(range(4))
-        return [labels[np.argmax(n)] for n in result]
+        return [LABELS[labels[np.argmax(n)]] for n in result]
 
     def preload_features(self,data):
         self.fdict = self.load_feats("features/mc.pickle",data,[self.avg_embedding_lookup])

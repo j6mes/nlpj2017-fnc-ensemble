@@ -310,17 +310,17 @@ class XiaoxuanWang(Classifier):
 
 
         if not os.path.isfile("features/tfidf.pickle"):
-            self.tfidfs.update(self.precompute_tf_idfs(dataset))
+            self.tfidfs.update(self.precompute_tf_idfs(dataset,train))
             pickle.dump(self.tfidfs, open("features/tfidf.pickle", "wb+"))
         else:
             tfs = pickle.load(open("features/tfidf.pickle", "rb"))
             self.tfidfs.update(tfs)
 
 
-    def precompute_tf_idfs(self,dataset):
+    def precompute_tf_idfs(self,dataset,train):
         headlines = []
         bodies = []
-        for stance in dataset.stances:
+        for stance in train:
             headlines.append(stance['Headline'])
             bodies.append(dataset.articles[stance['Body ID']])
 
@@ -329,11 +329,22 @@ class XiaoxuanWang(Classifier):
         train_set.extend(bodies)
 
         tfidf_vectorizer = TfidfVectorizer()
-        tfidf_train = tfidf_vectorizer.fit_transform(train_set).todense()
+        tfidf_vectorizer.fit(train_set)
+
+        headlines = []
+        bodies = []
+        for stance in dataset.stances:
+            headlines.append(stance['Headline'])
+            bodies.append(dataset.articles[stance['Body ID']])
+        gen_set = []
+        gen_set.extend(headlines)
+        gen_set.extend(bodies)
+
+        tfidf_scores = tfidf_vectorizer.transform(gen_set)
 
         sim_scores = dict()
         for x, stance in tqdm(enumerate(dataset.stances)):
-            sim_scores[stance['Stance ID']] = 1 - spatial.distance.cosine(tfidf_train[x], tfidf_train[x + len(bodies)])
+            sim_scores[stance['Stance ID']] = 1 - spatial.distance.cosine(tfidf_scores[x], tfidf_scores[x + len(bodies)])
 
         return sim_scores
 
