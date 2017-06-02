@@ -222,7 +222,9 @@ class FNCBaseLine(Classifier):
                                                polarity_features,
                                                refuting_features,
                                                word_overlap_features])):
-        self.fdict = self.load_feats("features/fnc."+fext+"pickle",stances,ffns)
+        if not hasattr(self,'fdict'):
+            self.fdict = dict()
+        self.fdict.update(self.load_feats("features/fnc."+fext+"pickle",stances,ffns))
 
 
 

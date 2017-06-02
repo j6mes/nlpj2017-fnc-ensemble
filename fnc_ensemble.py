@@ -23,8 +23,20 @@ import pickle
 
 if __name__ == "__main__":
     d = DataSet()
+
     folds,hold_out = kfold_split(d,n_folds=2)
     fold_stances, hold_out_stances = get_stances_for_folds(d,folds,hold_out)
+
+    test_dataset = DataSet("test")
+    d.articles.update(test_dataset.articles)
+
+    for stance in test_dataset.stances:
+        stance['Stance ID'] += len(d.stances)
+
+
+    test_stances = test_dataset.stances
+    d.stances.extend(test_stances)
+
 
     Xs = dict()
     ys = dict()
@@ -91,8 +103,9 @@ if __name__ == "__main__":
 
     for slave in slaves:
         print("Loading features for slave " + str(type(slave)))
-        slave.preload_features(d.stances)
         slave.load_w2v()
+        slave.preload_features(d.stances)
+
 
 
     print("UPPER BOUND:::")
@@ -112,18 +125,11 @@ if __name__ == "__main__":
     final_predictions = master.predict(zip(hold_out_stances,*slv_predicted_holdout))
     report_score(master.xys(hold_out_stances)[1],final_predictions)
 
-    test_dataset = DataSet("test")
-    d.articles.update(test_dataset.articles)
 
-    for stance in test_dataset.stances:
-        stance['Stance ID'] += len(d.stances)
 
 
     slv_predicted_test = []
     for slave in slaves:
-        slave.dataset.articles.update(test_dataset.articles)
-        slave.prepare_final(test_dataset.stances,all_folds)
-        slave.preload_features(test_dataset.stances,"test.")
         slv_predicted_test.append([LABELS.index(p) for p in slave.predict(test_dataset.stances)])
 
     final_predictions = master.predict(zip(test_dataset.stances,*slv_predicted_test))
@@ -133,6 +139,6 @@ if __name__ == "__main__":
         del stance['Stance ID']
 
     f = open('submission.csv', 'wb')
-    w = csv.DictWriter(f, test_dataset.stances.keys())
+    w = csv.DictWriter(f, ["Headline","Body ID", "Stance"])
     w.writerows(test_dataset)
     f.close()

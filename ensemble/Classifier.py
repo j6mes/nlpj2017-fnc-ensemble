@@ -55,6 +55,3 @@ class Classifier:
             fdict[stance['Stance ID']] = fs
 
         return fdict
-
-    def prepare_final(self,dataset,train):
-        pass

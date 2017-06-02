@@ -1,7 +1,6 @@
 import sys
 import io
 import nltk
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf8')
 import os
 
 current_path = os.path.dirname(os.path.abspath(__file__))

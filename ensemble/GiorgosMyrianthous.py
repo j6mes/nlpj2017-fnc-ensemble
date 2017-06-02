@@ -148,8 +148,10 @@ class GiorgosMyrianthous(Classifier):
 
 
     def preload_features(self,stances,fext=""):
+        if not hasattr(self,'fdict'):
+            self.fdict = dict()
         ff = [self.f_tfidf,extract_cosine_similarity, extract_word_overlap]
-        self.fdict = self.load_feats("features/gm."+fext+"pickle", stances,ff)
+        self.fdict.update(self.load_feats("features/gm."+fext+"pickle", stances,ff))
 
     def gen_feats(self, stances, ffns):
         print("Sparse feature generation")

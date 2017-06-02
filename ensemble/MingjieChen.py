@@ -63,7 +63,10 @@ class MingjieChen(Classifier):
         return [LABELS[labels[np.argmax(n)]] for n in result]
 
     def preload_features(self,data,fext=""):
-        self.fdict = self.load_feats("features/mc."+fext+"pickle",data,[self.avg_embedding_lookup])
+        if not hasattr(self,'fdict'):
+            self.fdict = dict()
+
+        self.fdict.update(self.load_feats("features/mc."+fext+"pickle",data,[self.avg_embedding_lookup]))
 
     def avg_embedding_lookup(self,id,headline,body):
         return self.mlp.average_vector([self.wvec(headline)],[self.wvec(body)],self.embeddings)[0]

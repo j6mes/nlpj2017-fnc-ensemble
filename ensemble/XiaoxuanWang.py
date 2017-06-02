@@ -308,6 +308,7 @@ class XiaoxuanWang(Classifier):
 
         self.tfidfs = dict()
 
+        self.t = train
 
         if not os.path.isfile("features/tfidf.pickle"):
             self.tfidfs.update(self.precompute_tf_idfs(dataset,train))
@@ -344,7 +345,8 @@ class XiaoxuanWang(Classifier):
 
         sim_scores = dict()
         for x, stance in tqdm(enumerate(dataset.stances)):
-            sim_scores[stance['Stance ID']] = 1 - spatial.distance.cosine(tfidf_scores[x], tfidf_scores[x + len(bodies)])
+            score = 1 - spatial.distance.cosine(tfidf_scores[x], tfidf_scores[x + len(bodies)])
+            sim_scores[stance['Stance ID']] =  score if np.isfinite(score) else 0
 
         return sim_scores
 
@@ -360,7 +362,11 @@ class XiaoxuanWang(Classifier):
         self.mlpc.fit(Xs, ys)
 
     def load_w2v(self):
-        pickle.load(open("features/tfidf.pickle","rb"))
+        if os.path.isfile("features/tfidf.pickle"):
+            self.tfidfs = pickle.load(open("features/tfidf.pickle","rb"))
+        else:
+            self.tfidfs = self.precompute_tf_idfs(self.dataset, self.dataset, self.t)
+            pickle.dump(self.tfidfs, open("features/tfidf.pickle", "wb+"))
 
     def delete_big_files(self):
         del self.tfidfs
@@ -373,10 +379,10 @@ class XiaoxuanWang(Classifier):
                                                polarity_features,
                                                refuting_features])):
         ffns.append(self.tfidf_feature)
-        self.fdict = self.load_feats("features/xxw."+fext+"pickle",stances,ffns)
+        if not hasattr(self,'fdict'):
+            self.fdict = dict()
+        self.fdict.update(self.load_feats("features/xxw."+fext+"pickle",stances,ffns))
 
 
-    def prepare_final(self,dataset,train):
-        self.tfidfs.update(self.precompute_tf_idfs(dataset,train))
 
 
