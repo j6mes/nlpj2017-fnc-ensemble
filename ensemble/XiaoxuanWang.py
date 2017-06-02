@@ -340,7 +340,7 @@ class XiaoxuanWang(Classifier):
         gen_set.extend(headlines)
         gen_set.extend(bodies)
 
-        tfidf_scores = tfidf_vectorizer.transform(gen_set)
+        tfidf_scores = tfidf_vectorizer.transform(gen_set).todense()
 
         sim_scores = dict()
         for x, stance in tqdm(enumerate(dataset.stances)):
