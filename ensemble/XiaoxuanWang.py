@@ -368,12 +368,12 @@ class XiaoxuanWang(Classifier):
     def tfidf_feature(self,id, headline, body):
         return [self.tfidfs[id]]
 
-    def preload_features(self, stances, ffns=list([
+    def preload_features(self, stances,fext="", ffns=list([
                                                get_word2vector_f,
                                                polarity_features,
                                                refuting_features])):
         ffns.append(self.tfidf_feature)
-        self.fdict = self.load_feats("features/xxw.pickle",stances,ffns)
+        self.fdict = self.load_feats("features/xxw."+fext+"pickle",stances,ffns)
 
 
 

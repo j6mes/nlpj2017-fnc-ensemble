@@ -30,5 +30,5 @@ class JiashuPu(Classifier):
         super().delete_big_files()
         del self.jp.feature_generator
 
-    def preload_features(self,data):
-        self.fdict = self.load_feats("features/jp.pickle",data,list([self.jp.get_feature_for_stance]))
+    def preload_features(self,data,fext=""):
+        self.fdict = self.load_feats("features/jp."+fext+"pickle",data,list([self.jp.get_feature_for_stance]))

@@ -2,12 +2,12 @@ from csv import DictReader
 
 
 class DataSet():
-    def __init__(self, path="fnc-1"):
+    def __init__(self, ds="train" , path="fnc-1"):
         self.path = path
 
         print("Reading dataset")
-        bodies = "train_bodies.csv"
-        stances = "train_stances.csv"
+        bodies = ds+"_bodies.csv"
+        stances = ds+"_stances.csv"
 
         self.stances = self.read(stances)
         articles = self.read(bodies)
@@ -17,6 +17,8 @@ class DataSet():
         for sid,s in enumerate(self.stances):
             s['Stance ID'] = sid
             s['Body ID'] = int(s['Body ID'])
+            if not 'Stance' in s.keys():
+                s['Stance'] = "Unlabelled"
 
         #copy all bodies into a dictionary
         for article in articles:
@@ -24,7 +26,6 @@ class DataSet():
 
         print("Total stances: " + str(len(self.stances)))
         print("Total bodies: " + str(len(self.articles)))
-
 
 
     def read(self,filename):

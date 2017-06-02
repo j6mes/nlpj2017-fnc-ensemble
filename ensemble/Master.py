@@ -39,13 +39,13 @@ class Master(Classifier):
         print(len(Xs[0]))
         self.gbc.fit(Xs,ys)
 
-    def preload_features(self, stances, ffns=list([
+    def preload_features(self, stances, fext="", ffns=list([
                                                binary_co_occurence,
                                                binary_co_occurence_stops,
                                                count_grams,
                                                polarity_features,
                                                refuting_features,
                                                word_overlap_features])):
-        self.fdict = self.load_feats("features/fnc.pickle",stances,ffns)
+        self.fdict = self.load_feats("features/fnc."+fext+"pickle",stances,ffns)
 
 

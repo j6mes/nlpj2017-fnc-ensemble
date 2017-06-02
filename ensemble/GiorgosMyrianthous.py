@@ -147,9 +147,9 @@ class GiorgosMyrianthous(Classifier):
         return scipy.sparse.hstack((bodies_tfidf, headlines_tfidf))
 
 
-    def preload_features(self,stances):
+    def preload_features(self,stances,fext=""):
         ff = [self.f_tfidf,extract_cosine_similarity, extract_word_overlap]
-        self.fdict = self.load_feats("features/gm.pickle", stances,ff)
+        self.fdict = self.load_feats("features/gm."+fext+"pickle", stances,ff)
 
     def gen_feats(self, stances, ffns):
         print("Sparse feature generation")

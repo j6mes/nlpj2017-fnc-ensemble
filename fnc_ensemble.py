@@ -1,3 +1,4 @@
+import csv
 import sys
 import numpy as np
 from scipy import spatial
@@ -110,3 +111,26 @@ if __name__ == "__main__":
 
     final_predictions = master.predict(zip(hold_out_stances,*slv_predicted_holdout))
     report_score(master.xys(hold_out_stances)[1],final_predictions)
+
+    test_dataset = DataSet("test")
+    d.articles.update(test_dataset.articles)
+
+    for stance in test_dataset.stances:
+        stance['Stance ID'] += len(d.stances)
+
+
+    slv_predicted_test = []
+    for slave in slaves:
+        slave.preload_features(test_dataset,"test.")
+        slv_predicted_test.append([LABELS.index(p) for p in slave.predict(test_dataset.stances)])
+
+    final_predictions = master.predict(zip(test_dataset.stances,*slv_predicted_test))
+
+    for label,stance in zip(final_predictions,test_dataset.stances):
+        stance['Stance'] = label
+        del stance['Stance ID']
+
+    f = open('submission.csv', 'wb')
+    w = csv.DictWriter(f, test_dataset.stances.keys())
+    w.writerows(test_dataset)
+    f.close()
