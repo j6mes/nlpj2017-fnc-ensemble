@@ -10,6 +10,7 @@ from ensemble.GiorgosMyrianthous import GiorgosMyrianthous
 from ensemble.JiashuPu import JiashuPu
 from ensemble.FNCBaseLine import FNCBaseLine
 from ensemble.Master import Master
+from ensemble.MingjieChen import MingjieChen
 from ensemble.XiaoxuanWang import XiaoxuanWang
 from feature_engineering import refuting_features, polarity_features, hand_features, gen_or_load_feats
 from feature_engineering import word_overlap_features
@@ -42,8 +43,7 @@ if __name__ == "__main__":
         train[fold] = np.hstack(tuple([fold_stances[i] for i in ids]))
         test[fold] = fold_stances[fold]
 
-    slave_classifiers = [FNCBaseLine,XiaoxuanWang,JiashuPu,GiorgosMyrianthous]
-
+    slave_classifiers = [FNCBaseLine,XiaoxuanWang,JiashuPu,GiorgosMyrianthous,MingjieChen]
 
     slv_predicted = dict()
     master_train = dict()
@@ -55,13 +55,13 @@ if __name__ == "__main__":
             slv_predicted[fold] = []
             master_train[fold] = []
             for slv in tqdm(slave_classifiers):
-                print("Create classifier" + str(type(slv)))
+                print("Create classifier" + str(slv))
                 cls = slv(d,all_folds)
 
-                print("Preload training data" + str(type(slv)))
+                print("Preload training data" + str(type(cls)))
                 cls.preload_features(d.stances)
 
-                print("Train on fold " + str(fold) + " - " + str(type(slv)))
+                print("Train on fold " + str(fold) + " - " + str(type(cls)))
                 cls.train(train[fold])
 
                 slv_predicted[fold].append([LABELS.index(p) for p in cls.predict(test[fold])])

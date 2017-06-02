@@ -1,6 +1,5 @@
 # coding=utf-8
 from utils.dataset import DataSet
-from utils.generate_test_splits import split
 from utils.score import report_score
 from collections import Counter
 import re,sys
@@ -23,11 +22,6 @@ from keras.preprocessing.sequence import pad_sequences
 #import lasagne
 from keras import backend as K
 from keras.models import Sequential
-dataset = DataSet()
-data_splits = split(dataset)
-training_data = data_splits['training']
-dev_data = data_splits['dev']
-test_data = data_splits['test']
 
 class Config:
     def __init__(self):
@@ -99,7 +93,7 @@ class process_data:
         word_count = Counter()
         #word_2_ind = {}
         f = re.compile(r'([0-9a-zA-Z]+)')
-        for d,q in zip(train_examples[0],train_examples[1]):
+        for d,q in list(zip(train_examples[0],train_examples[1])):
 
             for w in f.findall(d):
                 if w.lower() not in config.stoplist:
@@ -134,8 +128,7 @@ class process_data:
 
         return embeddings
 
-    def vectorize(self, examples, word_dict,
-                  sort_by_len=False):
+    def vectorize(self, examples, word_dict):
         """
         Vectorize `examples`.
         in_x1, in_x2: sequences for body and head  respecitvely.
@@ -144,7 +137,6 @@ class process_data:
         """
         in_x1 = []
         in_x2 = []
-        in_y = []
         f = re.compile(r'([0-9a-zA-Z]+)')
         maxbody = 0
         maxtitle = 0
@@ -152,7 +144,6 @@ class process_data:
 
             d = body
             q = examples[1][i]
-            a = examples[2][i]
             d_words = f.findall(d)
             q_words = f.findall(q)
 
@@ -165,28 +156,9 @@ class process_data:
             if (len(seq1) > 0) and (len(seq2) > 0):
                 in_x1.append(seq1)
                 in_x2.append(seq2)
-                if a == 'unrelated':
-                    in_y.append([1,0,0,0])
-                elif a == 'disagree':
-                    in_y.append([0,1,0,0])
-                elif a == 'discuss':
-                    in_y.append([0,0,1,0])
-                elif a == 'agree':
-                    in_y.append([0,0,0,1])
-                else:
-                    print("label wrong")
-        print("maxbody is {}, maxtitle is {}".format(maxbody,maxtitle))
-        def len_argsort(seq):
-            return sorted(range(len(seq)), key=lambda x: len(seq[x]))
 
-        if sort_by_len:
-            # sort by the document length
-            sorted_index = len_argsort(in_x1)
-            in_x1 = [in_x1[i] for i in sorted_index]
-            in_x2 = [in_x2[i] for i in sorted_index]
-            in_y = [in_y[i] for i in sorted_index]
 
-        return in_x1, in_x2, in_y
+        return in_x1, in_x2
 
 
 
@@ -226,7 +198,7 @@ class MLP:
 
     def train(self,train_vec,train_l):
         self.hist = self.model.fit(train_vec,train_l,batch_size=64,epochs=100,verbose=2,shuffle=True)
-        self.model.save_weights('features/mingjiechen.weights.h5')
+
 
 
 class Mingjie_Chen:
