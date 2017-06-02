@@ -2,7 +2,6 @@ import re
 
 from ensemble.Classifier import Classifier
 from original.Mingjie_Chen import MLP, process_data, Config
-import sys
 import numpy as np
 
 from utils.score import LABELS
@@ -26,12 +25,19 @@ class MingjieChen(Classifier):
         self.embeddings = self.f.gen_embeddings(self.word_dict, self.config)
 
     def delete_big_files(self):
+
+        self.mlp.model.save_weights('features/weights.h5')
         del self.f
+        del self.mlp
+        del self.config
+
 
     def load_w2v(self):
         self.f = process_data()
+        self.config = Config()
         self.embeddings = self.f.gen_embeddings(self.word_dict, self.config)
-
+        self.mlp = MLP()
+        self.mlp.model.load_weights('features/weights.h5')
 
     def train(self,data):
         Xs,ys = self.xys(data)

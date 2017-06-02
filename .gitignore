@@ -2,6 +2,7 @@
 splits/*.txt
 features/*.npy
 features/*.pickle
+features/*.h5
 *.pyc
 GoogleNews*
 .DS_Store

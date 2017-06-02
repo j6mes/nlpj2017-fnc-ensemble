@@ -43,7 +43,8 @@ if __name__ == "__main__":
         train[fold] = np.hstack(tuple([fold_stances[i] for i in ids]))
         test[fold] = fold_stances[fold]
 
-    slave_classifiers = [FNCBaseLine,XiaoxuanWang,JiashuPu,GiorgosMyrianthous,MingjieChen]
+    #FNCBaseLine,XiaoxuanWang,JiashuPu,GiorgosMyrianthous
+    slave_classifiers = [MingjieChen]
 
     slv_predicted = dict()
     master_train = dict()
