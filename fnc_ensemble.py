@@ -45,7 +45,7 @@ if __name__ == "__main__":
         test[fold] = fold_stances[fold]
 
     #
-    slave_classifiers = [FNCBaseLine,XiaoxuanWang,JiashuPu,GiorgosMyrianthous,MingjieChen]
+    slave_classifiers = [FNCBaseLine,JiashuPu,GiorgosMyrianthous,MingjieChen]
 
     slv_predicted = dict()
     master_train = dict()
@@ -83,16 +83,17 @@ if __name__ == "__main__":
             cls.preload_features(d.stances)
             cls.train(all_folds)
             slaves.append(cls)
-            cls.delete_big_files()
-        pickle.dump(slaves, open("features/slaves.pickle","wb+"))
+            #zcls.delete_big_files()
+        #pickle.dump(slaves, open("features/slaves.pickle","wb+"))
     else:
         slaves = pickle.load(open("features/slaves.pickle","rb"))
 
 
-    for slave in slaves:
-        print("Loading features for slave " + str(type(slave)))
-        slave.preload_features(d.stances)
-        slave.load_w2v()
+    #for slave in slaves:
+    #    print("Loading features for slave " + str(type(slave)))
+    #    slave.load_w2v()
+    #    slave.preload_features(d.stances)
+
 
 
     print("UPPER BOUND:::")
@@ -122,7 +123,7 @@ if __name__ == "__main__":
     slv_predicted_test = []
     for slave in slaves:
         slave.dataset.articles.update(test_dataset.articles)
-        slave.prepare_final(test_dataset.stances,all_folds)
+        slave.prepare_final(d,test_dataset,all_folds)
         slave.preload_features(test_dataset.stances,"test.")
         slv_predicted_test.append([LABELS.index(p) for p in slave.predict(test_dataset.stances)])
 
@@ -133,6 +134,6 @@ if __name__ == "__main__":
         del stance['Stance ID']
 
     f = open('submission.csv', 'wb')
-    w = csv.DictWriter(f, test_dataset.stances.keys())
+    w = csv.DictWriter(f, ["Headline","Body ID", "Stance"])
     w.writerows(test_dataset)
     f.close()

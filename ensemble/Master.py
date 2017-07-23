@@ -46,6 +46,8 @@ class Master(Classifier):
                                                polarity_features,
                                                refuting_features,
                                                word_overlap_features])):
+        if not hasattr(self,'fdict'):
+            self.fdict = dict()
         self.fdict = self.load_feats("features/fnc."+fext+"pickle",stances,ffns)
 
 

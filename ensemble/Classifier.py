@@ -56,5 +56,5 @@ class Classifier:
 
         return fdict
 
-    def prepare_final(self,dataset,train):
+    def prepare_final(self,dataset,finaldataset,train):
         pass
