@@ -108,25 +108,9 @@ class process_data:
         word_2_ind = {w:index+1 for (index,w) in enumerate(word_count.keys())}
         return word_2_ind
 
-    def gen_embeddings(self,word_dict, config):
-        """
-        Generate an initial embedding matrix for `word_dict`.
-        If an embedding file is not given or a word is not in the embedding file,
-        a randomly initialized vector will be used.
-        """
+    def gen_embeddings(self):
+        return gensim.models.KeyedVectors.load_word2vec_format("GoogleNews-vectors-negative300-small.bin", binary=True)
 
-        num_words = max(word_dict.values()) + 1
-        #num_words = len(word_dict)+1
-        embeddings =np.zeros((num_words, config.embedding_size))
-        print('Embeddings: %d x %d' % (num_words, config.embedding_size))
-        word_vector =  gensim.models.KeyedVectors.load_word2vec_format(
-    "GoogleNews-vectors-negative300-small.bin", binary=True)
-        for w in word_dict:
-            if w in word_vector.vocab:
-                embeddings[word_dict[w]] = word_vector[w]
-
-
-        return embeddings
 
     def vectorize(self, examples, word_dict):
         """
@@ -164,17 +148,14 @@ class process_data:
 
 
 class MLP:
-    def average_vector(self,x,y,embeddings):
+    def average_vector(self,body,title,embeddings):
+        body = [embeddings[tx] for tx in body if tx in embeddings]
+        title = [embeddings[ty] for ty in title if ty in embeddings]
+        body_vec = functools.reduce(lambda x,y: np.add(x,y),body )/len(body)
+        title_vec = functools.reduce(lambda x,y:np.add(x,y),title)/len(title)
 
-        in_x = []
-        for (temp_x,temp_y )in zip(x,y):
-            body = [embeddings[tx] for tx in temp_x]
-            title = [embeddings[ty] for ty in temp_y]
-            body_vec = functools.reduce(lambda x,y: np.add(x,y),body )/len(body)
-            title_vec = functools.reduce(lambda x,y:np.add(x,y),title)/len(title)
+        return np.concatenate((body_vec,title_vec))
 
-            in_x.append(np.concatenate((body_vec,title_vec)))
-        return np.array(in_x)
     def __init__(self):
         self.model = Sequential()
         self.model.add(Dense(256, activation='relu', input_dim=600))
