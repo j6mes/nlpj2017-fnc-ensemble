@@ -22,8 +22,7 @@ class MingjieChen(Classifier):
             headlines.append(stance['Headline'])
             bodies.append(data.articles[stance['Body ID']])
 
-        self.word_dict = self.f.build_dict(list(zip(headlines,bodies)), self.config)
-        self.embeddings = self.f.gen_embeddings(self.word_dict, self.config)
+        self.embeddings = self.f.gen_embeddings()
 
     def delete_big_files(self):
 
@@ -36,15 +35,15 @@ class MingjieChen(Classifier):
     def load_w2v(self):
         self.f = process_data()
         self.config = Config()
-        self.embeddings = self.f.gen_embeddings(self.word_dict, self.config)
+        self.embeddings = self.f.gen_embeddings()
         self.mlp = MLP()
-        self.mlp.model.load_weights('features/weights.h5')
 
     def train(self,data):
         Xs,ys = self.xys(data)
 
         in_y = []
         for a in ys:
+
             if a == LABELS[0]:
                 in_y.append([1, 0, 0, 0])
             elif a == LABELS[1]:
@@ -70,7 +69,7 @@ class MingjieChen(Classifier):
         self.fdict.update(self.load_feats("features/mc."+fext+"pickle",data,[self.avg_embedding_lookup]))
 
     def avg_embedding_lookup(self,id,headline,body):
-        return self.mlp.average_vector([self.wvec(headline)],[self.wvec(body)],self.embeddings)[0]
+        return self.mlp.averagce_vector(headline,body,self.embeddings)
 
     def wvec(self,text):
         f = re.compile(r'([0-9a-zA-Z]+)')
@@ -85,7 +84,7 @@ if __name__ == "__main__":
 
     all_folds = d.stances
 
-    test_dataset = DataSet("test")
+    test_dataset = DataSet("competition_test")
     slave.dataset.articles.update(test_dataset.articles)
 
     slave.preload_features(d.stances)
