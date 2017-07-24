@@ -11,9 +11,10 @@ from utils.score import LABELS
 class MingjieChen(Classifier):
     def __init__(self,data,train):
         super().__init__(data,train)
-        self.mlp = MLP()
         self.f = process_data()
         self.config = Config()
+
+        self.mlp = MLP(self.config.stoplist)
 
         headlines = []
         bodies = []
@@ -69,7 +70,7 @@ class MingjieChen(Classifier):
         self.fdict.update(self.load_feats("features/mc."+fext+"pickle",data,[self.avg_embedding_lookup]))
 
     def avg_embedding_lookup(self,id,headline,body):
-        return self.mlp.averagce_vector(headline,body,self.embeddings)
+        return self.mlp.average_vector(body, headline,self.embeddings)
 
     def wvec(self,text):
         f = re.compile(r'([0-9a-zA-Z]+)')
