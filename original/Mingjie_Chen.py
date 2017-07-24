@@ -152,8 +152,16 @@ class MLP:
     def average_vector(self,body,title,embeddings):
         body = [embeddings[tx] for tx in nltk.word_tokenize(body) if tx in embeddings and tx not in self.stoplist]
         title = [embeddings[ty] for ty in nltk.word_tokenize(title) if ty in embeddings and ty not in self.stoplist]
-        body_vec = functools.reduce(lambda x,y: np.add(x,y),body )/len(body)
-        title_vec = functools.reduce(lambda x,y:np.add(x,y),title)/len(title)
+
+        if len(body):
+            body_vec = functools.reduce(lambda x,y: np.add(x,y),body )/len(body)
+        else:
+            body_vec = np.zeros(300)
+
+        if len(title):
+            title_vec = functools.reduce(lambda x,y:np.add(x,y),title)/len(title)
+        else:
+            title_vec = np.zeros(300)
 
         return np.concatenate((body_vec,title_vec))
 
