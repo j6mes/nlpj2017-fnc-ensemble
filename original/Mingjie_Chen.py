@@ -196,8 +196,15 @@ class MLP:
         self.model.save_weights('features/mingjiechen.weights.h5')
 
 
-    def train(self,train_vec,train_l):
-        self.hist = self.model.fit(train_vec,train_l,batch_size=64,epochs=100,verbose=2,shuffle=True)
+    def train(self,in_vec,in_labels):
+        print("training with validation data")
+
+        train_vec,dev_vec = in_vec[:np.math.floor(len(in_vec) * 0.8)],in_vec[np.math.floor(len(in_vec) * 0.8):]
+        train_l,dev_l = in_labels[:np.math.floor(len(in_labels) * 0.8)],in_labels[np.math.floor(len(in_labels) * 0.8):]
+
+
+
+        self.hist = self.model.fit(train_vec,train_l,validation_data=(dev_vec,dev_l),batch_size=64,epochs=100,verbose=2,shuffle=True)
 
 
 

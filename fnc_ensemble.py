@@ -95,16 +95,15 @@ if __name__ == "__main__":
             cls.preload_features(d.stances)
             cls.train(all_folds)
             slaves.append(cls)
-            cls.delete_big_files()
-        pickle.dump(slaves, open("features/slaves.pickle","wb+"))
+        #pickle.dump(slaves, open("features/slaves.pickle","wb+"))
     else:
         slaves = pickle.load(open("features/slaves.pickle","rb"))
 
 
-    for slave in slaves:
-        print("Loading features for slave " + str(type(slave)))
-        slave.load_w2v()
-        slave.preload_features(d.stances)
+    #for slave in slaves:
+    #    print("Loading features for slave " + str(type(slave)))
+    #    slave.load_w2v()
+    #    slave.preload_features(d.stances)
 
 
 

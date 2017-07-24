@@ -4,6 +4,7 @@ from ensemble.Classifier import Classifier
 from original.Mingjie_Chen import MLP, process_data, Config
 import numpy as np
 
+from utils.dataset import DataSet
 from utils.score import LABELS
 
 
@@ -76,3 +77,18 @@ class MingjieChen(Classifier):
         text = f.findall(text)
         return [self.word_dict[w.lower()] if w.lower() in self.word_dict else 0 for w in text]
 
+
+
+if __name__ == "__main__":
+    d = DataSet()
+    slave = MingjieChen(d, d.stances)
+
+    all_folds = d.stances
+
+    test_dataset = DataSet("test")
+    slave.dataset.articles.update(test_dataset.articles)
+
+    slave.preload_features(d.stances)
+
+    slave.train(d.stances)
+    prd = slave.predict(test_dataset.stances)

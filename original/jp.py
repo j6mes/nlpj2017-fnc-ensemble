@@ -432,9 +432,13 @@ class FncClassifier:
         # (0.) word2vector
         body_feature_vector = self.feature_generator.word2vector_f_average(body_word_list)
         headline_feature_vector = self.feature_generator.word2vector_f_average(headline_word_list)
-        if headline_feature_vector is None or body_feature_vector is None:  # skip if headline has all unknown words
-            feature_vector = None
-            return feature_vector
+
+        if headline_feature_vector is None:
+            headline_feature_vector = np.zeros(300)
+
+        if body_feature_vector is None:  # skip if headline has all unknown words
+            body_feature_vector = np.zeros(300)
+
         all_feature_vector_list.append(body_feature_vector)
         all_feature_vector_list.append(headline_feature_vector)
         #
