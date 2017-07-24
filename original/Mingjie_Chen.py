@@ -22,6 +22,7 @@ from keras.preprocessing.sequence import pad_sequences
 #import lasagne
 from keras import backend as K
 from keras.models import Sequential
+import nltk
 
 class Config:
     def __init__(self):
@@ -149,14 +150,14 @@ class process_data:
 
 class MLP:
     def average_vector(self,body,title,embeddings):
-        body = [embeddings[tx] for tx in body if tx in embeddings]
-        title = [embeddings[ty] for ty in title if ty in embeddings]
+        body = [embeddings[tx] for tx in nltk.word_tokenize(body) if tx in embeddings and tx not in self.stoplist]
+        title = [embeddings[ty] for ty in nltk.word_tokenize(title) if ty in embeddings and ty not in self.stoplist]
         body_vec = functools.reduce(lambda x,y: np.add(x,y),body )/len(body)
         title_vec = functools.reduce(lambda x,y:np.add(x,y),title)/len(title)
 
         return np.concatenate((body_vec,title_vec))
 
-    def __init__(self):
+    def __init__(self, stoplist):
         self.model = Sequential()
         self.model.add(Dense(256, activation='relu', input_dim=600))
         self.model.add(Dropout(0.5))
@@ -165,7 +166,7 @@ class MLP:
         self.model.add(Dense(128, activation='relu'))
         self.model.add(Dropout(0.1))
         self.model.add(Dense(4, activation='softmax'))
-
+        self.stoplist = stoplist
         sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
         self.model.compile(loss='categorical_crossentropy',
                       optimizer=sgd,
